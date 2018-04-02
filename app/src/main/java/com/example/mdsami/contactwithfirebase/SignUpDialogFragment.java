@@ -62,10 +62,10 @@ public class SignUpDialogFragment extends DialogFragment implements SelectionDia
         View rootView;
 
         if (optionSelectedItem.compareTo("Student")==0){
-            rootView = inflater.inflate(R.layout.dialog_student, null);
+            rootView = inflater.inflate(R.layout.dialog_employee, null);
             onCreateLayoutInflateItem(rootView, builder, true);
         } else {
-            rootView = inflater.inflate(R.layout.dialog_teacher, null);
+            rootView = inflater.inflate(R.layout.dialog_management, null);
             onCreateLayoutInflateItem(rootView, builder, false);
         }
 

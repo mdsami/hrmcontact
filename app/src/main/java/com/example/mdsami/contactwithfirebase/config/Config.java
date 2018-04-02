@@ -11,6 +11,7 @@ public class Config extends MultiDexApplication{
      private static Config mInstance;
 
 
+
     @Override
     public void onCreate() {
         super.onCreate();
