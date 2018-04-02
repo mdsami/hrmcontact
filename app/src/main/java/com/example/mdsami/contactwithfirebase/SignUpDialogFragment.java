@@ -1,108 +1,150 @@
 package com.example.mdsami.contactwithfirebase;
 
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.EditText;
+
+import com.jaredrummler.materialspinner.MaterialSpinner;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link SignUpDialogFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link SignUpDialogFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class SignUpDialogFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class SignUpDialogFragment extends DialogFragment implements SelectionDialogFragment.optionItemSelectedInfo {
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
-    private OnFragmentInteractionListener mListener;
+    private EditText emailText, passText, nameText, addText, phoneText, instText;
+    private EditText guardianText, guardianPhone;
+    private String optionSelectedItem;
+    private MaterialSpinner genderText, classText, deptText, profText;
+
+    private String[] genderItems = {"MALE", "FEMALE"};
+    private String[] classItems = {"1","2","3","4","5","6","7","8","9","10","11","12"};
+    private String[] deptItems = {"Engineering", "Accounts", "Finance", "HR"};
+    private String[] profItems = {"HRM", "Employee"};
 
     public SignUpDialogFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment SignUpDialogFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static SignUpDialogFragment newInstance(String param1, String param2) {
+    public static SignUpDialogFragment newInstance(){
         SignUpDialogFragment fragment = new SignUpDialogFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
+    }
+
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_sign_up_dialog, container, false);
-    }
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomTheme_Dialog);
+        optionSelectedItem = getArguments().getString("type");
+        builder.setTitle(optionSelectedItem + " REGISTER");
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View rootView;
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (optionSelectedItem.compareTo("Student")==0){
+            rootView = inflater.inflate(R.layout.dialog_student, null);
+            onCreateLayoutInflateItem(rootView, builder, true);
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+            rootView = inflater.inflate(R.layout.dialog_teacher, null);
+            onCreateLayoutInflateItem(rootView, builder, false);
         }
+
+        return builder.create();
+    }
+
+    private void onCreateLayoutInflateItem(final View rootView, AlertDialog.Builder builder, final boolean isTrue) {
+        emailText = rootView.findViewById(R.id.emailText);
+        nameText = rootView.findViewById(R.id.nameText);
+        passText = rootView.findViewById(R.id.passText);
+        addText = rootView.findViewById(R.id.addText);
+        genderText = rootView.findViewById(R.id.genderText);
+        phoneText = rootView.findViewById(R.id.phoneText);
+        instText = rootView.findViewById(R.id.institutionText);
+
+        genderText.setItems(genderItems);
+
+        if (isTrue){
+            classText = rootView.findViewById(R.id.classText);
+            deptText = rootView.findViewById(R.id.departmentSpinner);
+            guardianText = rootView.findViewById(R.id.guardianText);
+            guardianPhone = rootView.findViewById(R.id.guardianPhone);
+
+            classText.setItems(classItems);
+            deptText.setItems(deptItems);
+        } else {
+            profText = rootView.findViewById(R.id.profText);
+            profText.setItems(profItems);
+        }
+
+        builder.setView(rootView)
+                .setPositiveButton("CREATE ACCOUNT", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (isTrue){
+                            StudentInfo activity = (StudentInfo) getActivity();
+                            activity.getInfo(emailText.getText().toString(),
+                                    nameText.getText().toString(),
+                                    passText.getText().toString(),
+                                    addText.getText().toString(),
+                                    genderText.getItems().get(genderText.getSelectedIndex()).toString(),
+                                    phoneText.getText().toString(),
+                                    instText.getText().toString(),
+                                    classText.getItems().get(classText.getSelectedIndex()).toString(),
+                                    deptText.getItems().get(deptText.getSelectedIndex()).toString(),
+                                    guardianText.getText().toString(),
+                                    guardianPhone.getText().toString(),
+                                    optionSelectedItem);
+                        } else {
+                            TeacherInfo activity = (TeacherInfo) getActivity();
+                            activity.getInfo(emailText.getText().toString(),
+                                    nameText.getText().toString(),
+                                    passText.getText().toString(),
+                                    addText.getText().toString(),
+                                    genderText.getItems().get(genderText.getSelectedIndex()).toString(),
+                                    phoneText.getText().toString(),
+                                    instText.getText().toString(),
+                                    profText.getItems().get(profText.getSelectedIndex()).toString(),
+                                    optionSelectedItem);
+                        }
+                    }
+                });
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+    public void optionItem(String item) {
+        optionSelectedItem = item;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    public interface StudentInfo {
+        void getInfo(String email, String name, String password, String address, String gender,
+                     String phone, String institution, String classname, String deptname, String gname, String gphone, String as);
     }
+
+    public interface TeacherInfo {
+        void getInfo(String email, String name, String password, String address,
+                     String gender, String phone, String institution, String prof, String as);
+    }
+
+
+
 }
